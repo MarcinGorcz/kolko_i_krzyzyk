@@ -1,6 +1,12 @@
 #!/bin/bash
 
+# Zadania projektu:
+# 3.0 - działa w trybie gry turowej,
+# 4.0 - pozwala na zapis i odtwarzanie przerwanej gry (save game),
+# 5.0 - pozwala na grę z komputerem.
+
 PLANSZA=('*' '*' '*' '*' '*' '*' '*' '*' '*')
+export zapisana_gra=('x' 'o' '*' '*' '*' '*' '*' '*' '*')
 koniec_gry=false
 
 function rysuj_plansze
@@ -124,4 +130,73 @@ function graj
     done
 }
 
-graj
+function menu_glowne
+{
+  clear
+  echo "Hej! Witaj w grze kolko i krzyzyk."
+  echo "Co chcesz zrobic?"
+  echo "1. Gra z komputerem."
+  echo "2. Gra z innym graczem."
+  echo "3. Wyjdz."
+  echo ""
+  echo "Wybierz 1-3"
+  read zmienna_menu
+
+  if [ "$zmienna_menu" -eq "$zmienna_menu" ] && [ "$zmienna_menu" -gt "0" ] && [ "$zmienna_menu" -le 3 ] 2> /dev/null; then
+  {
+    if [ "$zmienna_menu" -eq "1" ]; then
+    {
+      #echo "Tryb single"
+      menu_wyboru_trybu "1"
+    }
+    elif [ "$zmienna_menu" -eq "2" ]; then
+    {
+      #echo "Tryb multi"
+      menu_wyboru_trybu "2"
+    }
+    elif [ "$zmienna_menu" -eq "3" ]; then
+    {
+      echo "Wyjdz"
+    }
+    fi
+  }
+  else
+  {
+    menu_glowne
+  }
+  fi
+}
+
+function menu_wyboru_trybu()
+{
+  clear
+  echo "*Tip: Aby zapisac gre wpisz x w pole wyboru pola*"
+  echo "$1"
+  echo "Wybierz tryb gry:"
+  echo "1. Nowa gra"
+  echo "2. Kontynuuj zapisana gre"
+  read zmienna_menu_menu
+  if [ "$zmienna_menu_menu" -eq "$zmienna_menu_menu" ] && [ "$zmienna_menu_menu" -gt "0" ] && [ "$zmienna_menu_menu" -le 2 ] 2> /dev/null; then
+  {
+    if [ "$zmienna_menu_menu" -eq "1" ]; then
+    {
+      PLANSZA=('*' '*' '*' '*' '*' '*' '*' '*' '*')
+      echo "Nowa gra"
+    }
+    elif [ "$zmienna_menu_menu" -eq "2" ]; then
+    {
+      PLANSZA=$zapisana_gra
+      echo "Kontynuuj"
+    }
+    fi
+  }
+  else
+  {
+    menu_wyboru_trybu $1
+  }
+  fi
+
+}
+
+menu_glowne
+#graj
