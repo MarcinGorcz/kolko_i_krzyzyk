@@ -6,7 +6,7 @@
 # 5.0 - pozwala na grę z komputerem.                                -> OK
 
 PLANSZA=('*' '*' '*' '*' '*' '*' '*' '*' '*')
-export zapisana_gra=('x' 'o' '*' '*' '*' '*' '*' '*' '*')
+zapisana_gra=('*' 'X' '*' 'o' '*' 'X' 'o' '*' '*')
 koniec_gry=false
 
 function rysuj_plansze
@@ -16,10 +16,38 @@ function rysuj_plansze
   echo "${PLANSZA[@]:6:3}"
 }
 
+function czyj_nastepny_ruch
+{
+  count_of_x=$(echo ${zapisana_gra[*]} | grep -o "X" | wc -l)
+  count_of_o=$(echo "${zapisana_gra[*]}" | grep -o "o" | wc -l)
+  echo $count_of_x
+  echo $count_of_o
+
+  if [ $count_of_x == $count_of_o ]; then
+    {
+      echo "Zaczyna X"
+    }
+  else
+    {
+      echo "Zaczyna o"
+    }
+  fi
+}
+
 function zapisz_gre
 {
-  echo "Zapisuje gre"
-  echo "Wybierz pole"
+  #$ { echo "${PLANSZA[*]}" } > save.txt
+  echo "${zapisana_gra[*]}" > save.txt
+  #echo "Zapisuje gre"
+  #echo "Wybierz pole"
+}
+
+function wczytaj_gre
+{
+   read -a PLANSZA < save.txt
+   rysuj_plansze
+
+   echo "${PLANSZA[*]}"
 }
 
 function dodaj_znak
@@ -217,5 +245,10 @@ function menu_wyboru_trybu()
 
 }
 
-menu_glowne
+#menu_glowne
 #graj
+#czyj_nastepny_ruch
+
+
+zapisz_gre
+wczytaj_gre
