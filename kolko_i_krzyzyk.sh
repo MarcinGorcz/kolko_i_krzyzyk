@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Zadania projektu:
-# 3.0 - działa w trybie gry turowej,
-# 4.0 - pozwala na zapis i odtwarzanie przerwanej gry (save game),
-# 5.0 - pozwala na grę z komputerem.
+# 3.0 - działa w trybie gry turowej,                                -> OK
+# 4.0 - pozwala na zapis i odtwarzanie przerwanej gry (save game),  -> ???
+# 5.0 - pozwala na grę z komputerem.                                -> OK
 
 PLANSZA=('*' '*' '*' '*' '*' '*' '*' '*' '*')
 export zapisana_gra=('x' 'o' '*' '*' '*' '*' '*' '*' '*')
@@ -16,7 +16,13 @@ function rysuj_plansze
   echo "${PLANSZA[@]:6:3}"
 }
 
-function dodaj_krzyzyk
+function zapisz_gre
+{
+  echo "Zapisuje gre"
+  echo "Wybierz pole"
+}
+
+function dodaj_znak
 {
   echo "Wybierz pole:"
   czy_dobra_wartosc=false
@@ -26,11 +32,15 @@ function dodaj_krzyzyk
       if [ "$POLE" -eq "$POLE" ] && [ "$POLE" -gt "0" ] && [ "$POLE" -le 9 ] 2> /dev/null; then
         if [ "${PLANSZA[$POLE-1]}" == "*" ];then
 #         echo "Jest ok"
-          PLANSZA[$POLE-1]="X"
+          PLANSZA[$POLE-1]=$1
           czy_dobra_wartosc=true
         else
           echo "Pole jest juz zajete"
         fi
+      elif [ "$POLE" -eq "$POLE" ] && [ "$POLE" -eq "10" ]; then
+        {
+          zapisz_gre
+        }
       else
         echo "Nie liczba z zakresu 1-9!"
       fi
@@ -114,17 +124,25 @@ function graj
   rysuj_plansze
   while [[ $koniec_gry == false ]]
     do
-      dodaj_krzyzyk
-      rysuj_plansze
       clear
+      rysuj_plansze
+      dodaj_znak "X"
       sprawdz_czy_koniec_gry
       sprawdz_czy_remis
       if [[ $koniec_gry == true ]]; then
         break
       fi
-      dodaj_KOLKO
       clear
       rysuj_plansze
+      if [ $1 == '1' ]; then
+        {
+          dodaj_KOLKO
+        }
+      else
+        {
+          dodaj_znak "o"
+        }
+      fi
       sprawdz_czy_koniec_gry
       sprawdz_czy_remis
     done
@@ -170,7 +188,7 @@ function menu_glowne
 function menu_wyboru_trybu()
 {
   clear
-  echo "*Tip: Aby zapisac gre wpisz x w pole wyboru pola*"
+  echo "*Tip: Aby zapisac gre wpisz 10 w pole wyboru pola*"
   echo "$1"
   echo "Wybierz tryb gry:"
   echo "1. Nowa gra"
@@ -181,7 +199,8 @@ function menu_wyboru_trybu()
     if [ "$zmienna_menu_menu" -eq "1" ]; then
     {
       PLANSZA=('*' '*' '*' '*' '*' '*' '*' '*' '*')
-      echo "Nowa gra"
+      #echo "Nowa gra"
+      graj $1
     }
     elif [ "$zmienna_menu_menu" -eq "2" ]; then
     {
