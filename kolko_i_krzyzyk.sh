@@ -5,20 +5,20 @@
 # 4.0 - pozwala na zapis i odtwarzanie przerwanej gry (save game),  -> OK
 # 5.0 - pozwala na grę z komputerem.                                -> OK
 
-PLANSZA=('*' '*' '*' '*' '*' '*' '*' '*' '*')
-koniec_gry=false
+board=('*' '*' '*' '*' '*' '*' '*' '*' '*')
+is_game_finished=false
 
-function rysuj_plansze
+function draw_board
 {
-  echo "${PLANSZA[@]:0:3}"
-  echo "${PLANSZA[@]:3:3}"
-  echo "${PLANSZA[@]:6:3}"
+  echo "${board[@]:0:3}"
+  echo "${board[@]:3:3}"
+  echo "${board[@]:6:3}"
 }
 
-function czyj_nastepny_ruch
+function check_who_moves_next
 {
-  count_of_x=$(echo ${PLANSZA[*]} | grep -o "X" | wc -l)
-  count_of_o=$(echo "${PLANSZA[*]}" | grep -o "o" | wc -l)
+  count_of_x=$(echo ${board[*]} | grep -o "X" | wc -l)
+  count_of_o=$(echo "${board[*]}" | grep -o "o" | wc -l)
 
   if [ $count_of_x == $count_of_o ]; then
     {
@@ -31,33 +31,33 @@ function czyj_nastepny_ruch
   fi
 }
 
-function zapisz_gre
+function save_game
 {
-  echo "${PLANSZA[*]}" > save.txt
+  echo "${board[*]}" > save.txt
 }
 
-function wczytaj_gre
+function load_game
 {
-   read -a PLANSZA < save.txt
+   read -a board < save.txt
 }
 
-function dodaj_znak
+function add_sign_to_board
 {
   echo "Wybierz pole:"
-  czy_dobra_wartosc=false
-  while [[ $czy_dobra_wartosc == false ]]
+  is_value_correct=false
+  while [[ $is_value_correct == false ]]
     do
-      read POLE
-      if [ "$POLE" -eq "$POLE" ] && [ "$POLE" -gt "0" ] && [ "$POLE" -le 9 ] 2> /dev/null; then
-        if [ "${PLANSZA[$POLE-1]}" == "*" ];then
-          PLANSZA[$POLE-1]=$1
-          czy_dobra_wartosc=true
+      read field
+      if [ "$field" -eq "$field" ] && [ "$field" -gt "0" ] && [ "$field" -le 9 ] 2> /dev/null; then
+        if [ "${board[$field-1]}" == "*" ];then
+          board[$field-1]=$1
+          is_value_correct=true
         else
           echo "Pole jest juz zajete"
         fi
-      elif [ "$POLE" -eq "$POLE" ] && [ "$POLE" -eq "10" ]; then
+      elif [ "$field" -eq "$field" ] && [ "$field" -eq "10" ]; then
         {
-          zapisz_gre
+          save_game
         }
       else
         echo "Nie liczba z zakresu 1-9!"
@@ -65,127 +65,127 @@ function dodaj_znak
     done
 }
 
-function dodaj_KOLKO
+function add_circle_to_board_as_computer
 {
-  jest_dodane=false
-  while [ "$jest_dodane" != true ] ; do
-    WYLOSOWANA_LICZBA=$((0 + $RANDOM % 9))
-    if [ "${PLANSZA[$WYLOSOWANA_LICZBA]}" == "*" ];then
-      PLANSZA[$WYLOSOWANA_LICZBA]="o"
-      jest_dodane=true
+  is_circle_added=false
+  while [ "$is_circle_added" != true ] ; do
+    field=$((0 + $RANDOM % 9))
+    if [ "${board[$field]}" == "*" ];then
+      board[$field]="o"
+      is_circle_added=true
     fi
   done
 }
 
-function sprawdz_czy_remis
+function check_if_draw
 {
   value="*"
   # shellcheck disable=SC2076
-  if [[ ! " ${PLANSZA[*]} " =~ "${value}" ]] && [[ $koniec_gry == false ]]; then
+  if [[ ! " ${board[*]} " =~ "${value}" ]] && [[ $is_game_finished == false ]]; then
     echo "REMIS"
-    koniec_gry=true
+    is_game_finished=true
   fi
 }
 
-function sprawdz_czy_koniec_gry
+function check_if_game_is_finished
 {
-  OPCJE=("o" "X")
+  sign_options=("o" "X")
   #wiersze:
-  for gracz in "${OPCJE[@]}"
+  for player in "${sign_options[@]}"
   do
-    if [[ "${PLANSZA[0]}" == $gracz ]] && [[ "${PLANSZA[1]}" == $gracz ]] && [[ "${PLANSZA[2]}" == $gracz ]]; then
-      echo "WYGRANA 1: $gracz"
-      koniec_gry=true
+    if [[ "${board[0]}" == $player ]] && [[ "${board[1]}" == $player ]] && [[ "${board[2]}" == $player ]]; then
+      echo "WYGRANA 1: $player"
+      is_game_finished=true
       break
-    elif [[ "${PLANSZA[3]}" == $gracz ]] && [[ "${PLANSZA[4]}" == $gracz ]] && [[ "${PLANSZA[5]}" == $gracz ]]; then
-      echo "WYGRANA 2: $gracz"
-      koniec_gry=true
+    elif [[ "${board[3]}" == $player ]] && [[ "${board[4]}" == $player ]] && [[ "${board[5]}" == $player ]]; then
+      echo "WYGRANA 2: $player"
+      is_game_finished=true
       break
-    elif [[ "${PLANSZA[6]}" == $gracz ]] && [[ "${PLANSZA[7]}" == $gracz ]] && [[ "${PLANSZA[8]}" == $gracz ]]; then
-      echo "WYGRANA 3: $gracz"
-      koniec_gry=true
+    elif [[ "${board[6]}" == $player ]] && [[ "${board[7]}" == $player ]] && [[ "${board[8]}" == $player ]]; then
+      echo "WYGRANA 3: $player"
+      is_game_finished=true
       break
     #kolumny
-    elif [[ "${PLANSZA[0]}" == $gracz ]] && [[ "${PLANSZA[3]}" == $gracz ]] && [[ "${PLANSZA[6]}" == $gracz ]]; then
-      echo "WYGRANA 4: $gracz"
-      koniec_gry=true
+    elif [[ "${board[0]}" == $player ]] && [[ "${board[3]}" == $player ]] && [[ "${board[6]}" == $player ]]; then
+      echo "WYGRANA 4: $player"
+      is_game_finished=true
       break
-    elif [[ "${PLANSZA[1]}" == $gracz ]] && [[ "${PLANSZA[4]}" == $gracz ]] && [[ "${PLANSZA[7]}" == $$gracz ]]; then
-      echo "WYGRANA 5: $gracz"
-      koniec_gry=true
+    elif [[ "${board[1]}" == $player ]] && [[ "${board[4]}" == $player ]] && [[ "${board[7]}" == $$player ]]; then
+      echo "WYGRANA 5: $player"
+      is_game_finished=true
       break
-    elif [[ "${PLANSZA[2]}" == $gracz ]] && [[ "${PLANSZA[5]}" == $gracz ]] && [[ "${PLANSZA[8]}" == $gracz ]]; then
-      echo "WYGRANA 6: $gracz"
-      koniec_gry=true
+    elif [[ "${board[2]}" == $player ]] && [[ "${board[5]}" == $player ]] && [[ "${board[8]}" == $player ]]; then
+      echo "WYGRANA 6: $player"
+      is_game_finished=true
       break
     #przekatna
-    elif [[ "${PLANSZA[0]}" == $gracz ]] && [[ "${PLANSZA[4]}" == $gracz ]] && [[ "${PLANSZA[8]}" == $gracz ]]; then
-      echo "WYGRANA 7: $gracz"
-      koniec_gry=true
+    elif [[ "${board[0]}" == $player ]] && [[ "${board[4]}" == $player ]] && [[ "${board[8]}" == $player ]]; then
+      echo "WYGRANA 7: $player"
+      is_game_finished=true
       break
-    elif [[ "${PLANSZA[2]}" == $gracz ]] && [[ "${PLANSZA[4]}" == $gracz ]] && [[ "${PLANSZA[6]}" == $gracz ]]; then
-      echo "WYGRANA 8: $gracz"
-      koniec_gry=true
+    elif [[ "${board[2]}" == $player ]] && [[ "${board[4]}" == $player ]] && [[ "${board[6]}" == $player ]]; then
+      echo "WYGRANA 8: $player"
+      is_game_finished=true
       break
     fi
   done
 }
 
-function graj
+function play
 {
   clear
   if [[ $2 == "CONTINUE" ]]; then
   {
-    wczytaj_gre
-    local nastepny_gracz=$(czyj_nastepny_ruch)
+    load_game
+    local nastepny_gracz=$(check_who_moves_next)
     if [[ $nastepny_gracz == 'o' ]]; then
     {
       if [ $1 == "SINGLE" ]; then
         {
-          dodaj_KOLKO
+          add_circle_to_board_as_computer
         }
       else
         {
-          dodaj_znak "o"
+          add_sign_to_board "o"
         }
       fi
-      sprawdz_czy_koniec_gry
-      sprawdz_czy_remis
+      check_if_game_is_finished
+      check_if_draw
     }
     fi
   }
   fi
 
   clear
-  rysuj_plansze
+  draw_board
 
-  while [[ $koniec_gry == false ]]
+  while [[ $is_game_finished == false ]]
     do
-      dodaj_znak "X"
+      add_sign_to_board "X"
       clear
-      rysuj_plansze
-      sprawdz_czy_koniec_gry
-      sprawdz_czy_remis
-      if [[ $koniec_gry == true ]]; then
+      draw_board
+      check_if_game_is_finished
+      check_if_draw
+      if [[ $is_game_finished == true ]]; then
         break
       fi
       if [ $1 == "SINGLE" ]; then
         {
-          dodaj_KOLKO
+          add_circle_to_board_as_computer
         }
       else
         {
-          dodaj_znak "o"
+          add_sign_to_board "o"
         }
       fi
       clear
-      rysuj_plansze
-      sprawdz_czy_koniec_gry
-      sprawdz_czy_remis
+      draw_board
+      check_if_game_is_finished
+      check_if_draw
     done
 }
 
-function menu_glowne
+function main_menu
 {
   clear
   echo "Hej! Witaj w grze kolko i krzyzyk."
@@ -195,19 +195,19 @@ function menu_glowne
   echo "3. Wyjdz."
   echo ""
   echo "Wybierz 1-3"
-  read zmienna_menu
+  read selected_option_in_main_menu
 
-  if [ "$zmienna_menu" -eq "$zmienna_menu" ] && [ "$zmienna_menu" -gt "0" ] && [ "$zmienna_menu" -le 3 ] 2> /dev/null; then
+  if [ "$selected_option_in_main_menu" -eq "$selected_option_in_main_menu" ] && [ "$selected_option_in_main_menu" -gt "0" ] && [ "$selected_option_in_main_menu" -le 3 ] 2> /dev/null; then
   {
-    if [ "$zmienna_menu" -eq "1" ]; then
+    if [ "$selected_option_in_main_menu" -eq "1" ]; then
     {
-      menu_wyboru_trybu "SINGLE"
+      mode_select_menu "SINGLE"
     }
-    elif [ "$zmienna_menu" -eq "2" ]; then
+    elif [ "$selected_option_in_main_menu" -eq "2" ]; then
     {
-      menu_wyboru_trybu "MULTI"
+      mode_select_menu "MULTI"
     }
-    elif [ "$zmienna_menu" -eq "3" ]; then
+    elif [ "$selected_option_in_main_menu" -eq "3" ]; then
     {
       echo "Wyjdz"
     }
@@ -215,12 +215,12 @@ function menu_glowne
   }
   else
   {
-    menu_glowne
+    main_menu
   }
   fi
 }
 
-function menu_wyboru_trybu()
+function mode_select_menu()
 {
   clear
   echo "*Tip: Aby zapisac gre wpisz 10 w pole wyboru pola*"
@@ -228,25 +228,25 @@ function menu_wyboru_trybu()
   echo "Wybierz tryb gry:"
   echo "1. Nowa gra"
   echo "2. Kontynuuj zapisana gre"
-  read zmienna_menu_menu
-  if [ "$zmienna_menu_menu" -eq "$zmienna_menu_menu" ] && [ "$zmienna_menu_menu" -gt "0" ] && [ "$zmienna_menu_menu" -le 2 ] 2> /dev/null; then
+  read selected_option_in_mode_select_menu
+  if [ "$selected_option_in_mode_select_menu" -eq "$selected_option_in_mode_select_menu" ] && [ "$selected_option_in_mode_select_menu" -gt "0" ] && [ "$selected_option_in_mode_select_menu" -le 2 ] 2> /dev/null; then
   {
-    if [ "$zmienna_menu_menu" -eq "1" ]; then
+    if [ "$selected_option_in_mode_select_menu" -eq "1" ]; then
     {
-      PLANSZA=('*' '*' '*' '*' '*' '*' '*' '*' '*')
-      graj $1 "NEW_GAME"
+      board=('*' '*' '*' '*' '*' '*' '*' '*' '*')
+      play $1 "NEW_GAME"
     }
-    elif [ "$zmienna_menu_menu" -eq "2" ]; then
+    elif [ "$selected_option_in_mode_select_menu" -eq "2" ]; then
     {
-      graj $1 "CONTINUE"
+      play $1 "CONTINUE"
     }
     fi
   }
   else
   {
-    menu_wyboru_trybu $1
+    mode_select_menu $1
   }
   fi
 }
 
-menu_glowne
+main_menu
