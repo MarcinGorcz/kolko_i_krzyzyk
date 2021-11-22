@@ -6,7 +6,7 @@
 # 5.0 - pozwala na grę z komputerem.                                -> OK
 
 PLANSZA=('*' '*' '*' '*' '*' '*' '*' '*' '*')
-zapisana_gra=('*' 'X' '*' 'o' '*' 'X' 'o' '*' '*')
+#zapisana_gra=('X' 'X' '*' 'o' '*' 'X' 'o' '*' '*')
 koniec_gry=false
 
 function rysuj_plansze
@@ -18,36 +18,32 @@ function rysuj_plansze
 
 function czyj_nastepny_ruch
 {
-  count_of_x=$(echo ${zapisana_gra[*]} | grep -o "X" | wc -l)
-  count_of_o=$(echo "${zapisana_gra[*]}" | grep -o "o" | wc -l)
-  echo $count_of_x
-  echo $count_of_o
+  count_of_x=$(echo ${PLANSZA[*]} | grep -o "X" | wc -l)
+  count_of_o=$(echo "${PLANSZA[*]}" | grep -o "o" | wc -l)
+
+  #echo $count_of_x
+  #echo $count_of_o
 
   if [ $count_of_x == $count_of_o ]; then
     {
-      echo "Zaczyna X"
+      echo "X"
     }
   else
     {
-      echo "Zaczyna o"
+      echo "o"
     }
   fi
 }
 
 function zapisz_gre
 {
-  #$ { echo "${PLANSZA[*]}" } > save.txt
-  echo "${zapisana_gra[*]}" > save.txt
-  #echo "Zapisuje gre"
-  #echo "Wybierz pole"
+  echo "${PLANSZA[*]}" > save.txt
 }
 
 function wczytaj_gre
 {
    read -a PLANSZA < save.txt
-   rysuj_plansze
-
-   echo "${PLANSZA[*]}"
+   #echo "${PLANSZA[*]}"
 }
 
 function dodaj_znak
@@ -92,11 +88,9 @@ function sprawdz_czy_remis
 {
   value="*"
   # shellcheck disable=SC2076
-  if [[ ! " ${PLANSZA[*]} " =~ "${value}" ]]; then
+  if [[ ! " ${PLANSZA[*]} " =~ "${value}" ]] && [[ $koniec_gry == false ]]; then
     echo "REMIS"
     koniec_gry=true
-#  else
-#    echo "NIE REMIS"
   fi
 }
 
@@ -140,8 +134,6 @@ function sprawdz_czy_koniec_gry
       echo "WYGRANA 8: $gracz"
       koniec_gry=true
       break
-#    else
-#      echo "NIE WYGRANA"
     fi
   done
 }
@@ -149,20 +141,18 @@ function sprawdz_czy_koniec_gry
 function graj
 {
   clear
-  rysuj_plansze
-  while [[ $koniec_gry == false ]]
-    do
-      clear
-      rysuj_plansze
-      dodaj_znak "X"
-      sprawdz_czy_koniec_gry
-      sprawdz_czy_remis
-      if [[ $koniec_gry == true ]]; then
-        break
-      fi
-      clear
-      rysuj_plansze
-      if [ $1 == '1' ]; then
+  if [[ $2 == "CONTINUE" ]]; then
+  {
+    echo "KONTYNUACJA GRY"
+    wczytaj_gre
+    local nastepny_gracz=$(czyj_nastepny_ruch)
+    echo "      "
+    echo "NASTEPNY GRACZ TO: $nastepny_gracz"
+    echo "      "
+    if [[ $nastepny_gracz == 'o' ]]; then
+    {
+      echo "TUTAJ"
+      if [ $1 == "SINGLE" ]; then
         {
           dodaj_KOLKO
         }
@@ -171,6 +161,41 @@ function graj
           dodaj_znak "o"
         }
       fi
+      sprawdz_czy_koniec_gry
+      sprawdz_czy_remis
+    }
+    fi
+  }
+  elif [[ $2 == "NEW_GAME" ]]; then
+  {
+    echo "NOWA GRA"
+  }
+  fi
+
+  clear
+  rysuj_plansze
+
+  while [[ $koniec_gry == false ]]
+    do
+      dodaj_znak "X"
+      clear
+      rysuj_plansze
+      sprawdz_czy_koniec_gry
+      sprawdz_czy_remis
+      if [[ $koniec_gry == true ]]; then
+        break
+      fi
+      if [ $1 == "SINGLE" ]; then
+        {
+          dodaj_KOLKO
+        }
+      else
+        {
+          dodaj_znak "o"
+        }
+      fi
+      clear
+      rysuj_plansze
       sprawdz_czy_koniec_gry
       sprawdz_czy_remis
     done
@@ -193,12 +218,12 @@ function menu_glowne
     if [ "$zmienna_menu" -eq "1" ]; then
     {
       #echo "Tryb single"
-      menu_wyboru_trybu "1"
+      menu_wyboru_trybu "SINGLE"
     }
     elif [ "$zmienna_menu" -eq "2" ]; then
     {
       #echo "Tryb multi"
-      menu_wyboru_trybu "2"
+      menu_wyboru_trybu "MULTI"
     }
     elif [ "$zmienna_menu" -eq "3" ]; then
     {
@@ -227,13 +252,11 @@ function menu_wyboru_trybu()
     if [ "$zmienna_menu_menu" -eq "1" ]; then
     {
       PLANSZA=('*' '*' '*' '*' '*' '*' '*' '*' '*')
-      #echo "Nowa gra"
-      graj $1
+      graj $1 "NEW_GAME"
     }
     elif [ "$zmienna_menu_menu" -eq "2" ]; then
     {
-      PLANSZA=$zapisana_gra
-      echo "Kontynuuj"
+      graj $1 "CONTINUE"
     }
     fi
   }
@@ -242,13 +265,12 @@ function menu_wyboru_trybu()
     menu_wyboru_trybu $1
   }
   fi
-
 }
 
-#menu_glowne
+menu_glowne
 #graj
 #czyj_nastepny_ruch
 
-
-zapisz_gre
-wczytaj_gre
+#zapisz_gre
+#wczytaj_gre
+#czyj_nastepny_ruch
