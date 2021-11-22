@@ -2,11 +2,10 @@
 
 # Zadania projektu:
 # 3.0 - działa w trybie gry turowej,                                -> OK
-# 4.0 - pozwala na zapis i odtwarzanie przerwanej gry (save game),  -> ???
+# 4.0 - pozwala na zapis i odtwarzanie przerwanej gry (save game),  -> OK
 # 5.0 - pozwala na grę z komputerem.                                -> OK
 
 PLANSZA=('*' '*' '*' '*' '*' '*' '*' '*' '*')
-#zapisana_gra=('X' 'X' '*' 'o' '*' 'X' 'o' '*' '*')
 koniec_gry=false
 
 function rysuj_plansze
@@ -20,9 +19,6 @@ function czyj_nastepny_ruch
 {
   count_of_x=$(echo ${PLANSZA[*]} | grep -o "X" | wc -l)
   count_of_o=$(echo "${PLANSZA[*]}" | grep -o "o" | wc -l)
-
-  #echo $count_of_x
-  #echo $count_of_o
 
   if [ $count_of_x == $count_of_o ]; then
     {
@@ -43,7 +39,6 @@ function zapisz_gre
 function wczytaj_gre
 {
    read -a PLANSZA < save.txt
-   #echo "${PLANSZA[*]}"
 }
 
 function dodaj_znak
@@ -55,7 +50,6 @@ function dodaj_znak
       read POLE
       if [ "$POLE" -eq "$POLE" ] && [ "$POLE" -gt "0" ] && [ "$POLE" -le 9 ] 2> /dev/null; then
         if [ "${PLANSZA[$POLE-1]}" == "*" ];then
-#         echo "Jest ok"
           PLANSZA[$POLE-1]=$1
           czy_dobra_wartosc=true
         else
@@ -77,7 +71,6 @@ function dodaj_KOLKO
   while [ "$jest_dodane" != true ] ; do
     WYLOSOWANA_LICZBA=$((0 + $RANDOM % 9))
     if [ "${PLANSZA[$WYLOSOWANA_LICZBA]}" == "*" ];then
-#      echo $WYLOSOWANA_LICZBA
       PLANSZA[$WYLOSOWANA_LICZBA]="o"
       jest_dodane=true
     fi
@@ -143,15 +136,10 @@ function graj
   clear
   if [[ $2 == "CONTINUE" ]]; then
   {
-    echo "KONTYNUACJA GRY"
     wczytaj_gre
     local nastepny_gracz=$(czyj_nastepny_ruch)
-    echo "      "
-    echo "NASTEPNY GRACZ TO: $nastepny_gracz"
-    echo "      "
     if [[ $nastepny_gracz == 'o' ]]; then
     {
-      echo "TUTAJ"
       if [ $1 == "SINGLE" ]; then
         {
           dodaj_KOLKO
@@ -165,10 +153,6 @@ function graj
       sprawdz_czy_remis
     }
     fi
-  }
-  elif [[ $2 == "NEW_GAME" ]]; then
-  {
-    echo "NOWA GRA"
   }
   fi
 
@@ -217,12 +201,10 @@ function menu_glowne
   {
     if [ "$zmienna_menu" -eq "1" ]; then
     {
-      #echo "Tryb single"
       menu_wyboru_trybu "SINGLE"
     }
     elif [ "$zmienna_menu" -eq "2" ]; then
     {
-      #echo "Tryb multi"
       menu_wyboru_trybu "MULTI"
     }
     elif [ "$zmienna_menu" -eq "3" ]; then
@@ -268,9 +250,3 @@ function menu_wyboru_trybu()
 }
 
 menu_glowne
-#graj
-#czyj_nastepny_ruch
-
-#zapisz_gre
-#wczytaj_gre
-#czyj_nastepny_ruch
